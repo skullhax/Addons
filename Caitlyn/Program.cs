@@ -48,26 +48,26 @@ namespace Caitlyn
             E = new Spell.Skillshot(SpellSlot.E, 800, SkillShotType.Linear, (int)0.25f, (int)1600f, (int)80f); 
             R = new Spell.Targeted(SpellSlot.R, 2000);
 
-            CaityMenu = MainMenu.AddMenu("xaxiCaitlyn", "cm_cait");
-            CaityMenu.AddGroupLabel("Caitlyn#");
+            CaityMenu = MainMenu.AddMenu("xaxiCaitlyn", "xaxi_cait");
+            CaityMenu.AddGroupLabel("Caitlyn Settings");
             CaityMenu.AddSeparator();
             CaityMenu.AddLabel("Rewritten by Xaxixeo credis: CookieMonster10");
 
             SettingsMenu = CaityMenu.AddSubMenu("Settings", "settings");
             SettingsMenu.AddGroupLabel("Settings");
             SettingsMenu.AddLabel("Combo");
-            SettingsMenu.Add("comboQ", new CheckBox("Use Q on Combo"));
-            SettingsMenu.Add("comboW", new CheckBox("Use W on Combo"));
-            SettingsMenu.Add("comboE", new CheckBox("Use E on Combo"));
-            SettingsMenu.Add("comboR", new CheckBox("Use R on Combo"));
+            SettingsMenu.Add("comboQ", new CheckBox("Use Q"));
+            SettingsMenu.Add("comboW", new CheckBox("Use W"));
+            SettingsMenu.Add("comboE", new CheckBox("Use E"));
+            SettingsMenu.Add("comboR", new CheckBox("Use R"));
             SettingsMenu.AddLabel("Harass");
-            SettingsMenu.Add("harassQ", new CheckBox("Use Q on Harass"));
-            SettingsMenu.Add("laneclearMana", new Slider("Mana % To Use Q", 30, 0, 100));
+            SettingsMenu.Add("harassQ", new CheckBox("Use Q"));
+            SettingsMenu.Add("laneclearMana", new Slider("Mana% Q", 30, 1, 99));
             SettingsMenu.AddLabel("Drawings");
-            SettingsMenu.Add("drawQ", new CheckBox("Draw Q Range"));
-            SettingsMenu.Add("drawW", new CheckBox("Draw W Range"));
-            SettingsMenu.Add("drawE", new CheckBox("Draw E Range"));
-            SettingsMenu.Add("drawR", new CheckBox("Draw R Range"));
+            SettingsMenu.Add("drawQ", new CheckBox("Q Range"));
+            SettingsMenu.Add("drawW", new CheckBox("W Range"));
+            SettingsMenu.Add("drawE", new CheckBox("E Range"));
+            SettingsMenu.Add("drawR", new CheckBox("R Range"));
             SettingsMenu.AddLabel("Misc");
             //SettingsMenu.Add("antigapcloser", new CheckBox("Use E to get away from enemy"));
             SettingsMenu.Add("Dash", new KeyBind("Dash to mouse pos", false, KeyBind.BindTypes.HoldActive, 'Z'));
@@ -94,22 +94,23 @@ namespace Caitlyn
 
         public static float QDmg(Obj_AI_Base target)
         {
-
-            // { PHYSICAL DAMAGE: 20 / 60 / 100 / 140 / 180 } + (+ 130% AD) 
-            return Caity.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 20, 60, 100, 140, 180 }[Program.Q.Level] + .130 * Caity.FlatPhysicalDamageMod));
+            {
+                return Caity.GetSpellDamage(target, SpellSlot.Q);
+            }
         }
 
         public static float WDmg(Obj_AI_Base target)
         {
-            return Caity.CalculateDamageOnUnit(target, DamageType.Magical,
-                (float)(new[] { 80, 130, 180 , 230, 280 }[Program.W.Level] + .60 * Caity.FlatMagicDamageMod));
+            {
+                return Caity.GetSpellDamage(target, SpellSlot.W);
+            }
         }
 
         public static float EDmg(Obj_AI_Base target)
         {
-            return Caity.CalculateDamageOnUnit(target, DamageType.Magical,
-                (float)(new[] { 80, 130, 180, 230, 280 }[Program.E.Level] + .80 * Caity.FlatMagicDamageMod));
+            {
+                return Caity.GetSpellDamage(target, SpellSlot.E);
+            }
         }
 
         public static float RDmg(Obj_AI_Base target)
@@ -126,9 +127,9 @@ namespace Caitlyn
 
             if (Player.Instance.ManaPercent > mana)
             {
-                foreach (var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie))
+                foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsZombie))
                 {
-                    if (useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.Medium)
+                    if (useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.High)
                     {
                         Q.Cast(enemy);
                     }
@@ -144,13 +145,23 @@ namespace Caitlyn
             var useE = SettingsMenu["comboE"].Cast<CheckBox>().CurrentValue;
             var useR = SettingsMenu["comboR"].Cast<CheckBox>().CurrentValue;
 
-            foreach(var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsDead && !target.IsZombie))
+            foreach(var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsZombie))
             {
-                if(useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.Medium)
+                if(useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.High)
                 {
                     Q.Cast(enemy);
                 }
-                if(useE && E.IsReady() && E.GetPrediction(enemy).HitChance >= HitChance.Medium && enemy.Health <= EDmg(enemy))
+                if (useW && W.IsReady() && W.Cast(enemy)&&
+                    (enemy.HasBuffOfType(BuffType.Stun )
+                    || enemy.HasBuffOfType(BuffType.Snare) 
+                    || enemy.HasBuffOfType(BuffType.Taunt)
+                    || enemy.HasBuffOfType(BuffType.Knockup) 
+                    || enemy.HasBuff("Recall")
+                    || enemy.Health <= WDmg(enemy)))
+                {
+                    W.Cast(enemy);
+                }
+                if(useE && E.IsReady() && E.GetPrediction(enemy).HitChance >= HitChance.High && enemy.Health <= EDmg(enemy))
                 {
                     E.Cast(enemy);
                 }
@@ -162,8 +173,7 @@ namespace Caitlyn
                
 
             }
-
-            return;
+            
         }
 
         private static void Dash_To_Mouse()
@@ -176,8 +186,7 @@ namespace Caitlyn
         {
             if (R.IsReady())
             {
-                foreach (var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(R.Range) 
-                                                                      && !target.IsDead 
+                foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(R.Range) 
                                                                       && !target.IsZombie
                                                                       && target.Health <= RDmg(target)))
                 {
@@ -188,20 +197,21 @@ namespace Caitlyn
 
         private static void SmartW()
         {
-            foreach (var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(W.Range) && !target.IsDead && 
-                    (target.HasBuffOfType(BuffType.Stun )
-                    || target.HasBuffOfType(BuffType.Snare) 
-                    || target.HasBuffOfType(BuffType.Taunt)
-                    || target.HasBuffOfType(BuffType.Knockup) 
-                    || target.HasBuff("Recall")  )))
-                {
+            foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(W.Range) &&
+                                                                               (target.HasBuffOfType(BuffType.Stun)
+                                                                                || target.HasBuffOfType(BuffType.Snare)
+                                                                                || target.HasBuffOfType(BuffType.Taunt)
+                                                                                || target.HasBuffOfType(BuffType.Knockup)
+                                                                                || target.HasBuff("Recall")
+                                                                                || target.Health <= WDmg(target))))
+            {
                 W.Cast(enemy);
-                }
+            }
         }
 
         private static void SmartQ()
         {
-            foreach (var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsDead &&
+            foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) &&
                     (target.HasBuffOfType(BuffType.Stun) 
                     || target.HasBuffOfType(BuffType.Snare) 
                     || target.HasBuffOfType(BuffType.Taunt) 
@@ -209,7 +219,8 @@ namespace Caitlyn
                     || target.HasBuffOfType(BuffType.Suppression)
                     || target.HasBuffOfType(BuffType.Charm)
                     || target.HasBuffOfType(BuffType.Knockup)
-                    || target.HasBuff("Recall")    )))
+                    || target.HasBuff("Recall")
+                    || target.Health <= QDmg(target))))
             {
                 Q.Cast(enemy);
             }
@@ -220,22 +231,22 @@ namespace Caitlyn
         {
             if (SettingsMenu["drawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = Q.Range }.Draw(Caity.Position);
+                new Circle { Color = Color.Black, BorderWidth = 1, Radius = Q.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = W.Range }.Draw(Caity.Position);
+                new Circle { Color = Color.Black, BorderWidth = 1, Radius = W.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = E.Range }.Draw(Caity.Position);
+                new Circle { Color = Color.Black, BorderWidth = 1, Radius = E.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = R.Range }.Draw(Caity.Position);
+                new Circle { Color = Color.Black, BorderWidth = 1, Radius = R.Range }.Draw(Caity.Position);
             }
         }
 

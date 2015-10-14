@@ -8,7 +8,7 @@ using EloBuddy.SDK;
 using EloBuddy.SDK.Rendering;
 using SharpDX;
 
-namespace Caitlyn //only changed this line :p 
+namespace Caitlyn
 {
     public class TargetSelector
     {
@@ -34,7 +34,7 @@ namespace Caitlyn //only changed this line :p
             {
                 return _target;
             }
-            return TargetSelector.GetTarget(range, type);
+            return GetTarget(range, type);
         }
 
         private static AIHeroClient _target;
