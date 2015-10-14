@@ -22,7 +22,7 @@ namespace Caitlyn //only changed this line :p
         {
             if (_target != null)
             {
-                Circle.Draw(Color.Red, 150, _target.Position);
+                Circle.Draw(Color.Black, 150, _target.Position);
             }
         }
 

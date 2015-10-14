@@ -1,4 +1,4 @@
-﻿//used MarioGK's HU3:Ezreal script as reference c:
+﻿//used CookieMonster10 script as reference c:
 using System;
 using System.Linq;
 using EloBuddy;
@@ -48,10 +48,10 @@ namespace Caitlyn
             E = new Spell.Skillshot(SpellSlot.E, 800, SkillShotType.Linear, (int)0.25f, (int)1600f, (int)80f); 
             R = new Spell.Targeted(SpellSlot.R, 2000);
 
-            CaityMenu = MainMenu.AddMenu("CM:Caitlyn", "cm_cait");
-            CaityMenu.AddGroupLabel("Caitlyn 1.0");
+            CaityMenu = MainMenu.AddMenu("xaxiCaitlyn", "cm_cait");
+            CaityMenu.AddGroupLabel("Caitlyn#");
             CaityMenu.AddSeparator();
-            CaityMenu.AddLabel("Written by CookieMonster10");
+            CaityMenu.AddLabel("Rewritten by Xaxixeo credis: CookieMonster10");
 
             SettingsMenu = CaityMenu.AddSubMenu("Settings", "settings");
             SettingsMenu.AddGroupLabel("Settings");
@@ -72,7 +72,7 @@ namespace Caitlyn
             //SettingsMenu.Add("antigapcloser", new CheckBox("Use E to get away from enemy"));
             SettingsMenu.Add("Dash", new KeyBind("Dash to mouse pos", false, KeyBind.BindTypes.HoldActive, 'Z'));
             //SettingsMenu.Add("EQ Combo", new KeyBind("Perform E-Q combo" , false , KeyBind.BindTypes.HoldActive, 'T'));
-            SettingsMenu.Add("Auto Ult", new CheckBox("Stay alart for low hp enemies to auto ult them"));
+            SettingsMenu.Add("Auto Ult", new CheckBox("KS R"));
             SettingsMenu.Add("Smart W", new CheckBox("Smart W"));
             SettingsMenu.Add("Smart Q", new CheckBox("Smart Q"));
 
@@ -97,7 +97,7 @@ namespace Caitlyn
 
             // { PHYSICAL DAMAGE: 20 / 60 / 100 / 140 / 180 } + (+ 130% AD) 
             return Caity.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 20, 60, 100, 140, 180 }[Program.Q.Level] + 1.3 * Caity.FlatPhysicalDamageMod));
+                (float)(new[] { 20, 60, 100, 140, 180 }[Program.Q.Level] + .130 * Caity.FlatPhysicalDamageMod));
         }
 
         public static float WDmg(Obj_AI_Base target)
@@ -115,7 +115,7 @@ namespace Caitlyn
         public static float RDmg(Obj_AI_Base target)
         {
             return Caity.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 250, 475, 700}[Program.R.Level] + 2.0 * Caity.FlatPhysicalDamageMod));
+                (float)(new[] { 250, 475, 700}[Program.R.Level] + .200 * Caity.FlatPhysicalDamageMod));
         }
 
         private static void do_Haress()
@@ -219,22 +219,22 @@ namespace Caitlyn
         {
             if (SettingsMenu["drawQ"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.Blue, BorderWidth = 1, Radius = Q.Range }.Draw(Caity.Position);
+                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = Q.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawW"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.SkyBlue, BorderWidth = 1, Radius = W.Range }.Draw(Caity.Position);
+                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = W.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawE"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.YellowGreen, BorderWidth = 1, Radius = E.Range }.Draw(Caity.Position);
+                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = E.Range }.Draw(Caity.Position);
             }
 
             if (SettingsMenu["drawR"].Cast<CheckBox>().CurrentValue)
             {
-                new Circle() { Color = Color.White, BorderWidth = 1, Radius = R.Range }.Draw(Caity.Position);
+                new Circle() { Color = Color.Black, BorderWidth = 1, Radius = R.Range }.Draw(Caity.Position);
             }
         }
 
