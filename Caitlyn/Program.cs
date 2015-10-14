@@ -114,8 +114,9 @@ namespace Caitlyn
 
         public static float RDmg(Obj_AI_Base target)
         {
-            return Caity.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 250, 475, 700}[Program.R.Level] + .190 * Caity.FlatPhysicalDamageMod));
+            {
+                return Caity.GetSpellDamage(target, SpellSlot.R);
+            }
         }
 
         private static void do_Haress()
@@ -177,8 +178,8 @@ namespace Caitlyn
             {
                 foreach (var enemy in HeroManager.Enemies.Where(target => target.IsValidTarget(R.Range) 
                                                                       && !target.IsDead 
-                                                                      && !target.IsZombie 
-                                                                      && target.Health <= RDmg(target)  ))
+                                                                      && !target.IsZombie
+                                                                      && target.Health <= RDmg(target)))
                 {
                     R.Cast(enemy);
                 }
