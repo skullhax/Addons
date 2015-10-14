@@ -115,7 +115,7 @@ namespace Caitlyn
         public static float RDmg(Obj_AI_Base target)
         {
             return Caity.CalculateDamageOnUnit(target, DamageType.Physical,
-                (float)(new[] { 250, 475, 700}[Program.R.Level] + .200 * Caity.FlatPhysicalDamageMod));
+                (float)(new[] { 250, 475, 700}[Program.R.Level] + .190 * Caity.FlatPhysicalDamageMod));
         }
 
         private static void do_Haress()
