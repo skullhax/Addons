@@ -36,7 +36,7 @@ namespace Caitlyn
 
             Bootstrap.Init(null);
             TargetSelector.Init();
-
+            Chat.Print("<font color = \"#2fff0a\">xaxiCait by xaxi</font>");
 
             //      SpellSlot, Range, Skillshot Type, Cast, Delay, Width.
             Q = new Spell.Skillshot(SpellSlot.Q, 1240, SkillShotType.Linear, (int)0.25f, (int)2000f, (int)60f); 
