@@ -65,10 +65,10 @@ namespace Caitlyn
             SettingsMenu.AddLabel("LaneClear");
             SettingsMenu.Add("laneclearQ", new CheckBox("Use Q"));
             SettingsMenu.Add("laneclearMana", new Slider("Mana% Q", 90, 1, 99));
-            SettingsMenu.AddSeparator();
-            SettingsMenu.AddLabel("JungleClear");
-            SettingsMenu.Add("jungleclearQ", new CheckBox("Use Q"));
-            SettingsMenu.Add("jungleclearMana", new Slider("Mana% Q", 10, 1, 99));
+            //SettingsMenu.AddSeparator();
+            //SettingsMenu.AddLabel("JungleClear");
+            //SettingsMenu.Add("jungleclearQ", new CheckBox("Use Q"));
+            //SettingsMenu.Add("jungleclearMana", new Slider("Mana% Q", 10, 1, 99));
             SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Drawings");
             SettingsMenu.Add("drawQ", new CheckBox("Q Range"));
@@ -175,19 +175,19 @@ namespace Caitlyn
                 }
             }
         }
-        public static void LaneClear()
+        public static void do_LaneClear()
         {
-            var useLC = SettingsMenu["laneclearQ"].Cast<CheckBox>().CurrentValue;
+            var useLc = SettingsMenu["laneclearQ"].Cast<CheckBox>().CurrentValue;
             var manaL = SettingsMenu["laneclearMana"].Cast<Slider>().CurrentValue;
 
             if (Player.Instance.ManaPercent > manaL)
             {
-                var useQLC =
+                var useQlc =
                     (Obj_AI_Minion)GetEnemy(Q.Range, GameObjectType.obj_AI_Minion);
 
-                if (useLC && Q.IsReady())
+                if (useLc && Q.IsReady())
                 {
-                    Q.Cast(useQLC.ServerPosition);
+                    Q.Cast(useQlc.ServerPosition);
                 }
             }
         }
