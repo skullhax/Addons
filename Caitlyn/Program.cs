@@ -1,4 +1,4 @@
-﻿//used CookieMonster10 and xRp script as reference c:
+﻿//used CookieMonster10, flux and xRp scripts as references *-*
 using System;
 using System.Linq;
 using EloBuddy;
@@ -65,10 +65,10 @@ namespace Caitlyn
             SettingsMenu.AddLabel("LaneClear");
             SettingsMenu.Add("laneclearQ", new CheckBox("Use Q"));
             SettingsMenu.Add("laneclearMana", new Slider("Mana% Q", 90, 1, 99));
-            //SettingsMenu.AddSeparator();
-            //SettingsMenu.AddLabel("JungleClear");
-            //SettingsMenu.Add("jungleclearQ", new CheckBox("Use Q"));
-            //SettingsMenu.Add("jungleclearMana", new Slider("Mana% Q", 10, 1, 99));
+            SettingsMenu.AddSeparator();
+            SettingsMenu.AddLabel("JungleClear");
+            SettingsMenu.Add("jungleclearQ", new CheckBox("Use Q"));
+            SettingsMenu.Add("jungleclearMana", new Slider("Mana% Q", 10, 1, 99));
             SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Drawings");
             SettingsMenu.Add("drawQ", new CheckBox("Q Range"));
@@ -131,6 +131,18 @@ namespace Caitlyn
                         a => a.Distance(Player.Instance) < range && !a.IsDead && !a.IsInvulnerable);
             }
         }
+        public static Obj_AI_Base GetJgEnemy(float range, GameObjectType t)
+        {
+            switch (t)
+            {
+                case GameObjectType.AIHeroClient:
+                    return EntityManager.Heroes.Enemies.OrderBy(a => a.Health).FirstOrDefault(
+                        a => a.Distance(Player.Instance) < range && !a.IsDead && !a.IsInvulnerable);
+                default:
+                    return EntityManager.MinionsAndMonsters.GetJungleMonsters().FirstOrDefault(
+                        a => a.Distance(Player.Instance) < range && !a.IsDead && !a.IsInvulnerable);
+            }
+        }
         public static float QDmg(Obj_AI_Base target)
         {
             {
@@ -188,6 +200,22 @@ namespace Caitlyn
                 if (useLc && Q.IsReady())
                 {
                     Q.Cast(useQlc.ServerPosition);
+                }
+            }
+        }
+        public static void do_JungleClear()
+        {
+            var useJc = SettingsMenu["jungleclearQ"].Cast<CheckBox>().CurrentValue;
+            var manaJ = SettingsMenu["jungleclearMana"].Cast<Slider>().CurrentValue;
+
+            if (Player.Instance.ManaPercent > manaJ)
+            {
+                var useQjc =
+                    (Obj_AI_Minion)GetJgEnemy(Q.Range, GameObjectType.obj_AI_Minion);
+
+                if (useJc && Q.IsReady())
+                {
+                    Q.Cast(useQjc.ServerPosition);
                 }
             }
         }
