@@ -1,4 +1,4 @@
-﻿//used CookieMonster10 script as reference c:
+﻿//used CookieMonster10 and xRp script as reference c:
 using System;
 using System.Linq;
 using EloBuddy;
@@ -17,37 +17,34 @@ namespace Caitlyn
     {
 
         //public static Obj_AI_Base t;
-        public static AIHeroClient Caity
-        {
-            get { return ObjectManager.Player; }
-        }
+        public static AIHeroClient Caity = ObjectManager.Player;
 
-        static void Main(string[] args1)
+        static void Main(string[] args)
         {
             Loading.OnLoadingComplete += Loading_OnLoadingComplete;
         }
 
         
-        public static Spell.Skillshot Q;
-        public static Spell.Targeted W;
-        public static Spell.Skillshot E;
-        public static Spell.Targeted R;
+        public static Spell.Skillshot Q, E;
+        public static Spell.Targeted W, R;
         public static Menu CaityMenu, SettingsMenu;
 
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
+            //Only if u select Caitlyn
             if (Player.Instance.ChampionName != "Caitlyn") return;
 
             Bootstrap.Init(null);
             TargetSelector.Init();
 
 
-            // SpellSlot , Range , Skillshot type , Cast  delay , width 
+            //      SpellSlot, Range, Skillshot Type, Cast, Delay, Width.
             Q = new Spell.Skillshot(SpellSlot.Q, 1240, SkillShotType.Linear, (int)0.25f, (int)2000f, (int)60f); 
             W = new Spell.Targeted(SpellSlot.W, 820);
             E = new Spell.Skillshot(SpellSlot.E, 800, SkillShotType.Linear, (int)0.25f, (int)1600f, (int)80f); 
             R = new Spell.Targeted(SpellSlot.R, 2000);
 
+            //Menu
             CaityMenu = MainMenu.AddMenu("xaxiCaitlyn", "xaxi_cait");
             CaityMenu.AddGroupLabel("Caitlyn Settings");
             CaityMenu.AddSeparator();
@@ -59,39 +56,81 @@ namespace Caitlyn
             SettingsMenu.Add("comboQ", new CheckBox("Use Q"));
             SettingsMenu.Add("comboW", new CheckBox("Use W"));
             SettingsMenu.Add("comboE", new CheckBox("Use E"));
-            SettingsMenu.Add("comboR", new CheckBox("Use R"));
+            SettingsMenu.Add("comboR", new CheckBox("Use R KS in Combo"));
+            SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Harass");
             SettingsMenu.Add("harassQ", new CheckBox("Use Q"));
-            SettingsMenu.Add("laneclearMana", new Slider("Mana% Q", 30, 1, 99));
+            SettingsMenu.Add("harassMana", new Slider("Mana% Q", 70, 1, 99));
+            SettingsMenu.AddSeparator();
+            SettingsMenu.AddLabel("LaneClear");
+            SettingsMenu.Add("laneclearQ", new CheckBox("Use Q"));
+            SettingsMenu.Add("laneclearMana", new Slider("Mana% Q", 90, 1, 99));
+            SettingsMenu.AddSeparator();
+            SettingsMenu.AddLabel("JungleClear");
+            SettingsMenu.Add("jungleclearQ", new CheckBox("Use Q"));
+            SettingsMenu.Add("jungleclearMana", new Slider("Mana% Q", 10, 1, 99));
+            SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Drawings");
             SettingsMenu.Add("drawQ", new CheckBox("Q Range"));
             SettingsMenu.Add("drawW", new CheckBox("W Range"));
             SettingsMenu.Add("drawE", new CheckBox("E Range"));
             SettingsMenu.Add("drawR", new CheckBox("R Range"));
+            SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Misc");
-            //SettingsMenu.Add("antigapcloser", new CheckBox("Use E to get away from enemy"));
             SettingsMenu.Add("Dash", new KeyBind("Dash to mouse pos", false, KeyBind.BindTypes.HoldActive, 'Z'));
-            //SettingsMenu.Add("EQ Combo", new KeyBind("Perform E-Q combo" , false , KeyBind.BindTypes.HoldActive, 'T'));
-            SettingsMenu.Add("Auto Ult", new CheckBox("KS R"));
-            SettingsMenu.Add("Smart W", new CheckBox("Smart W"));
             SettingsMenu.Add("Smart Q", new CheckBox("Smart Q"));
+            SettingsMenu.Add("Smart W", new CheckBox("Smart W"));
+            SettingsMenu.Add("Smart E", new CheckBox("Smart E"));
+            SettingsMenu.Add("Smart R", new CheckBox("KS R No Combo"));
 
             Game.OnTick += Game_onTick;
             Drawing.OnDraw += Drawing_OnDraw;
+            Interrupter.OnInterruptableSpell += Interrupter_OnInterruptableSpell;
+            Gapcloser.OnGapcloser += Gapcloser_OnGapCloser;
+        }
+        // Interrupter
+        private static void Interrupter_OnInterruptableSpell(Obj_AI_Base sender,
+            Interrupter.InterruptableSpellEventArgs args)
+        {
+            var intTarget = TargetSelector.GetTarget(Q.Range, DamageType.Physical);
+            {
+                if (Q.IsReady() && sender.IsValidTarget(Q.Range) && SettingsMenu["Smart Q"].Cast<CheckBox>().CurrentValue)
+                    Q.Cast(intTarget.ServerPosition);
+            }
         }
 
+        // GapCloser
+        private static void Gapcloser_OnGapCloser
+            (AIHeroClient sender, Gapcloser.GapcloserEventArgs gapcloser)
+        {
+            if (!SettingsMenu["Smart E"].Cast<CheckBox>().CurrentValue) return;
+            if (ObjectManager.Player.Distance(gapcloser.Sender, true) <
+                E.Range * E.Range && sender.IsValidTarget())
+            {
+                E.Cast(gapcloser.Sender);
+            }
+        }
         private static void Game_onTick(EventArgs args)
         {
             if (Orbwalker.ActiveModesFlags == Orbwalker.ActiveModes.Harass) do_Haress();
             if (Orbwalker.ActiveModesFlags == Orbwalker.ActiveModes.Combo) do_Combo();
             if (SettingsMenu["Dash"].Cast<KeyBind>().CurrentValue) Dash_To_Mouse();
-            if (SettingsMenu["Auto Ult"].Cast<CheckBox>().CurrentValue) Ult_Anyone();
+            if (SettingsMenu["Smart R"].Cast<CheckBox>().CurrentValue) Ult_Anyone();
             if (SettingsMenu["Smart W"].Cast<CheckBox>().CurrentValue) SmartW();
-            if (SettingsMenu["Smart Q"].Cast<CheckBox>().CurrentValue) SmartQ();
-            //if (!SettingsMenu["EQ Combo"].Cast<KeyBind>().CurrentValue) EQC();   WIP
-
+            
         }
-
+        public static Obj_AI_Base GetEnemy(float range, GameObjectType t)
+        {
+            switch (t)
+            {
+                case GameObjectType.AIHeroClient:
+                    return EntityManager.Heroes.Enemies.OrderBy(a => a.Health).FirstOrDefault(
+                        a => a.Distance(Player.Instance) < range && !a.IsDead && !a.IsInvulnerable);
+                default:
+                    return EntityManager.MinionsAndMonsters.EnemyMinions.OrderBy(a => a.Health).FirstOrDefault(
+                        a => a.Distance(Player.Instance) < range && !a.IsDead && !a.IsInvulnerable);
+            }
+        }
         public static float QDmg(Obj_AI_Base target)
         {
             {
@@ -123,7 +162,7 @@ namespace Caitlyn
         private static void do_Haress()
         {
             var useQ = SettingsMenu["harassQ"].Cast<CheckBox>().CurrentValue;
-            var mana = SettingsMenu["laneclearMana"].Cast<Slider>().CurrentValue;
+            var mana = SettingsMenu["harassQMana"].Cast<Slider>().CurrentValue;
 
             if (Player.Instance.ManaPercent > mana)
             {
@@ -136,7 +175,22 @@ namespace Caitlyn
                 }
             }
         }
+        public static void LaneClear()
+        {
+            var useLC = SettingsMenu["laneclearQ"].Cast<CheckBox>().CurrentValue;
+            var manaL = SettingsMenu["laneclearMana"].Cast<Slider>().CurrentValue;
 
+            if (Player.Instance.ManaPercent > manaL)
+            {
+                var useQLC =
+                    (Obj_AI_Minion)GetEnemy(Q.Range, GameObjectType.obj_AI_Minion);
+
+                if (useLC && Q.IsReady())
+                {
+                    Q.Cast(useQLC.ServerPosition);
+                }
+            }
+        }
         private static void do_Combo()
         {
 
@@ -208,25 +262,7 @@ namespace Caitlyn
                 W.Cast(enemy);
             }
         }
-
-        private static void SmartQ()
-        {
-            foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) &&
-                    (target.HasBuffOfType(BuffType.Stun) 
-                    || target.HasBuffOfType(BuffType.Snare) 
-                    || target.HasBuffOfType(BuffType.Taunt) 
-                    || target.HasBuffOfType(BuffType.Slow)
-                    || target.HasBuffOfType(BuffType.Suppression)
-                    || target.HasBuffOfType(BuffType.Charm)
-                    || target.HasBuffOfType(BuffType.Knockup)
-                    || target.HasBuff("Recall")
-                    || target.Health <= QDmg(target))))
-            {
-                Q.Cast(enemy);
-            }
-        }
-
-
+        
         private static void Drawing_OnDraw(EventArgs args)
         {
             if (SettingsMenu["drawQ"].Cast<CheckBox>().CurrentValue)
