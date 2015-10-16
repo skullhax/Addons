@@ -55,7 +55,8 @@ namespace Caitlyn
             SettingsMenu.AddLabel("Combo");
             SettingsMenu.Add("comboQ", new CheckBox("Use Q"));
             SettingsMenu.Add("comboW", new CheckBox("Use W"));
-            SettingsMenu.Add("comboE", new CheckBox("Use E"));
+            SettingsMenu.Add("comboE", new CheckBox("Use E KS"));
+            SettingsMenu.Add("comboE2", new CheckBox("Use E Escape"));
             SettingsMenu.Add("comboR", new CheckBox("Use R KS in Combo"));
             SettingsMenu.AddSeparator();
             SettingsMenu.AddLabel("Harass");
@@ -180,9 +181,10 @@ namespace Caitlyn
             {
                 foreach (var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsZombie))
                 {
-                    if (useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.High)
+                    var predictionQ = Q.GetPrediction(enemy);
+                    if (useQ && Q.IsReady() && Caity.GetAutoAttackRange() < Caity.Distance(enemy) && predictionQ.HitChancePercent >= 70)
                     {
-                        Q.Cast(enemy);
+                        Q.Cast(predictionQ.CastPosition);
                     }
                 }
             }
@@ -225,13 +227,15 @@ namespace Caitlyn
             var useQ = SettingsMenu["comboQ"].Cast<CheckBox>().CurrentValue;
             var useW = SettingsMenu["comboW"].Cast<CheckBox>().CurrentValue;
             var useE = SettingsMenu["comboE"].Cast<CheckBox>().CurrentValue;
+            var useE2 = SettingsMenu["comboE2"].Cast<CheckBox>().CurrentValue;
             var useR = SettingsMenu["comboR"].Cast<CheckBox>().CurrentValue;
 
             foreach(var enemy in EntityManager.Heroes.Enemies.Where(target => target.IsValidTarget(Q.Range) && !target.IsZombie))
             {
-                if(useQ && Q.IsReady() && Q.GetPrediction(enemy).HitChance >= HitChance.High)
+                var predictionQ = Q.GetPrediction(enemy);
+                if (useQ && Q.IsReady() && Caity.GetAutoAttackRange() < Caity.Distance(enemy) && predictionQ.HitChancePercent >= 70)
                 {
-                    Q.Cast(enemy);
+                    Q.Cast(predictionQ.CastPosition);
                 }
                 if (useW && W.IsReady() && W.Cast(enemy)&&
                     (enemy.HasBuffOfType(BuffType.Stun )
@@ -243,10 +247,17 @@ namespace Caitlyn
                 {
                     W.Cast(enemy);
                 }
-                if(useE && E.IsReady() && E.GetPrediction(enemy).HitChance >= HitChance.High && enemy.Health <= EDmg(enemy))
+
+                if (useE2 && E.IsReady() && E.GetPrediction(enemy).HitChancePercent >= 70 && Caity.Distance(enemy) <= 200)
                 {
                     E.Cast(enemy);
                 }
+
+                if (useE && E.IsReady() && E.GetPrediction(enemy).HitChancePercent >= 70 && enemy.Health <= EDmg(enemy))
+                {
+                    E.Cast(enemy);
+                }
+                
                 if (useR && R.IsReady() && enemy.Health <= RDmg(enemy))
                 {
                     R.Cast(enemy);
