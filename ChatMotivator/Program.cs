@@ -20,12 +20,12 @@ namespace ChatMotivator
         public static List<string> Smileys;
         public static List<string> Greetings;
         public static Dictionary<GameEventId, int> Rewards;
-        public static Random rand = new Random();
+        public static Random Rand = new Random();
 
-        public static int kills = 0;
-        public static int deaths = 0;
-        public static float congratzTime = 0;
-        public static float lastMessage = 0;
+        public static int Kills = 0;
+        public static int Deaths = 0;
+        public static float CongratzTime = 0;
+        public static float LastMessage = 0;
 
         public static Menu Settings;
 
@@ -40,15 +40,15 @@ namespace ChatMotivator
 
         static void Game_OnGameLoad(EventArgs args)
         {
-            setupMenu();
-            setupRewards();
-            setupMessages();
+            SetupMenu();
+            SetupRewards();
+            SetupMessages();
 
             Chat.Print("<font color = \"#2fff0a\">ChatMotivator by xaxi</font>");
             
         }
 
-        static void setupMenu()
+        static void SetupMenu()
         {
             ChatMenu = MainMenu.AddMenu("ChatMotivator", "chat_motivator");
             ChatMenu.AddGroupLabel("Chat Settings");
@@ -71,7 +71,7 @@ namespace ChatMotivator
             SettingsMenu.Add("sayEnding", new CheckBox("End Message"));
         }
 
-        static void setupRewards()
+        static void SetupRewards()
         {
             Rewards = new Dictionary<GameEventId, int>
             {
@@ -80,7 +80,7 @@ namespace ChatMotivator
             };
         }
 
-        static void setupMessages()
+        static void SetupMessages()
         {
             Messages = new List<string>
             {
@@ -123,62 +123,62 @@ namespace ChatMotivator
             };
         }
 
-        static string getRandomElement(List<string> collection, bool firstEmpty = true)
+        static string GetRandomElement(List<string> collection, bool firstEmpty = true)
         {
-            if (firstEmpty && rand.Next(3) == 0)
+            if (firstEmpty && Rand.Next(3) == 0)
                 return collection[0];
 
-            return collection[rand.Next(collection.Count)];
+            return collection[Rand.Next(collection.Count)];
         }
 
-        static string generateMessage()
+        static string GenerateMessage()
         {
-            string message = getRandomElement(Starts);
-            message += getRandomElement(Messages, false);
-            message += getRandomElement(Endings);
-            message += getRandomElement(Smileys);
+            string message = GetRandomElement(Starts);
+            message += GetRandomElement(Messages, false);
+            message += GetRandomElement(Endings);
+            message += GetRandomElement(Smileys);
             return message;
         }
 
-        static string generateGreeting()
+        static string GenerateGreeting()
         {
-            string greeting = getRandomElement(Greetings, false);
-            greeting += getRandomElement(Smileys);
+            string greeting = GetRandomElement(Greetings, false);
+            greeting += GetRandomElement(Smileys);
             return greeting;
         }
 
-        static string generateEnding()
+        static string GenerateEnding()
         {
-            string ending = getRandomElement(Ending, false);
-            ending += getRandomElement(Smileys);
+            string ending = GetRandomElement(Ending, false);
+            ending += GetRandomElement(Smileys);
             return ending;
         }
 
-        static void sayCongratulations()
+        static void SayCongratulations()
         {
-            if (SettingsMenu["sayCongratulate"].Cast<CheckBox>().CurrentValue && Game.Time > lastMessage + SettingsMenu["sayCongratulateInterval"].Cast<Slider>().CurrentValue)
+            if (SettingsMenu["sayCongratulate"].Cast<CheckBox>().CurrentValue && Game.Time > LastMessage + SettingsMenu["sayCongratulateInterval"].Cast<Slider>().CurrentValue)
             {
-                lastMessage = Game.Time;
-                Chat.Print(generateMessage());
+                LastMessage = Game.Time;
+                Chat.Say(GenerateMessage());
             }
         }
 
-        static void sayGreeting()
+        static void SayGreeting()
         {
             if( SettingsMenu["sayGreetingAllChat"].Cast<CheckBox>().CurrentValue)
             {
-                Chat.Print("/all " + generateGreeting());
+                Chat.Say("/all " + GenerateGreeting());
             }
             else
             {
-                Chat.Print(generateGreeting());
+                Chat.Say(GenerateGreeting());
             }
         }
-        static void sayEnding()
+        static void SayEnding()
         {
             if( SettingsMenu["sayEnding"].Cast<CheckBox>().CurrentValue)
             {
-                Chat.Print("/all " + generateEnding());
+                Chat.Say("/all " + GenerateEnding());
             }
         }
 
@@ -193,7 +193,7 @@ namespace ChatMotivator
             int maxDelay = SettingsMenu["sayGreetingDelayMax"].Cast<Slider>().CurrentValue;
 
             // greeting message
-            Core.DelayAction(sayGreeting, rand.Next(Math.Min(minDelay, maxDelay), Math.Max(minDelay, maxDelay)) * 1000);
+            Core.DelayAction(SayGreeting, Rand.Next(Math.Min(minDelay, maxDelay), Math.Max(minDelay, maxDelay)) * 1000);
         }
 
         static void Game_OnGameEnd(EventArgs args)
@@ -205,25 +205,25 @@ namespace ChatMotivator
             const int minfDelay = 100;
             const int maxfDelay = 1001;
             //end message
-            Core.DelayAction(sayEnding, rand.Next(Math.Min(minfDelay, maxfDelay), Math.Max(minfDelay, maxfDelay)));
+            Core.DelayAction(SayEnding, Rand.Next(Math.Min(minfDelay, maxfDelay), Math.Max(minfDelay, maxfDelay)));
         }
 
         static void Game_OnGameUpdate(EventArgs args)
         {
             // champ kill message
-            if (kills > deaths && congratzTime < Game.Time && congratzTime != 0)
+            if (Kills > Deaths && CongratzTime < Game.Time && CongratzTime != 0)
             {
-                sayCongratulations();
+                SayCongratulations();
 
-                kills = 0;
-                deaths = 0;
-                congratzTime = 0;
+                Kills = 0;
+                Deaths = 0;
+                CongratzTime = 0;
             }
-            else if (kills != deaths && congratzTime < Game.Time)
+            else if (Kills != Deaths && CongratzTime < Game.Time)
             {
-                kills = 0;
-                deaths = 0;
-                congratzTime = 0;
+                Kills = 0;
+                Deaths = 0;
+                CongratzTime = 0;
             }            
         }
 
@@ -231,19 +231,19 @@ namespace ChatMotivator
         {
             if( Rewards.ContainsKey( args.EventId ) )
             {
-                Obj_AI_Base Killer = ObjectManager.GetUnitByNetworkId<Obj_AI_Base>((uint)args.NetworkId);
+                var killer = ObjectManager.GetUnitByNetworkId<Obj_AI_Base>(args.NetworkId);
                 
-                if( Killer.IsAlly )
+                if( killer.IsAlly )
                 {
                     // we will not congratulate ourselves lol :D
-                    if( (kills == 0 && !Killer.IsMe) || kills > 0 )
+                    if( (Kills == 0 && !killer.IsMe) || Kills > 0 )
                     {
-                        kills += Rewards[args.EventId];
+                        Kills += Rewards[args.EventId];
                     }
                 }
                 else
                 {
-                    deaths += Rewards[args.EventId];
+                    Deaths += Rewards[args.EventId];
                 }
             }
             else
@@ -254,7 +254,7 @@ namespace ChatMotivator
             int minDelay = SettingsMenu["sayCongratulateDelayMin"].Cast<Slider>().CurrentValue;
             int maxDelay = SettingsMenu["sayCongratulateDelayMax"].Cast<Slider>().CurrentValue;
      
-            congratzTime = Game.Time + rand.Next( Math.Min(minDelay, maxDelay), Math.Max(minDelay, maxDelay) );
+            CongratzTime = Game.Time + Rand.Next( Math.Min(minDelay, maxDelay), Math.Max(minDelay, maxDelay) );
         }
     }
 }
