@@ -84,42 +84,41 @@ namespace ChatMotivator
         {
             Messages = new List<string>
             {
-                "gj", "good job", "very gj", "very good job", "wp", "well played",
-                "well", "nicely played", "np", "amazing",
-                "nice", "nice1", "nice one", "well done", "sweet", "good"
+                "gj", "boa mano", "nice", "boa cara", "wp", "joga muito",
+                "boa", "jogou mt", "boa!", "Boa time."
             };
 
             Starts = new List<string>
             {
-                "", " ", "that was ",
-                "  ", "wow ", "wow, "
+                "", " ", "wtf ",
+                "  ", "eitan ", "eita, "
             };
 
             Endings = new List<string>
             {
-                "", " m8", " mate",
-                " friend", " team",  " guys",
-                " friends", " boys", " man"
+                "", " mano", " cara",
+                " time", " team",  " guys",
+                " gente", " caras", " man"
             };
 
             Ending = new List<string>
             {
-                "gg", "wp", "gg & wp",
-                "good game", "well played"
+                "gg honrados", "gg wp honrados", "nice game guys honrados",
+                "good game honrados", "wp honrados"
             };
 
             Smileys = new List<string>
             {
                 "",
-                " ^^",
-                " :p"
+                " xD",
+                " :D"
             };
 
             Greetings = new List<string>
             {
-                "gl", "good luck", "hf", "have fun", "Good Luck & Have Fun",
-                "Let's Fun", "gl hf", "gl and hf", "gl & hf",
-                "Good Luck, Have Fun", "Let's all have a nice game!"
+                "Bom Jogo!", "Boa Sorte!", "Olá, bom jogo!", "Bom jogo a todos.", "Boa Sorte e Bom jogo!",
+                "Saudações, bom jogo!", "Boa sorte gente!", "Boa sorte e bom jogo a todos!", "Bom jogo e boa sorte!",
+                "Bom jogo amigos!", "Que todos tenham um bom jogo!"
             };
         }
 
